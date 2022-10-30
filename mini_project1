@@ -1,0 +1,340 @@
+This is a real time dataset of the ineuron technical consultant team. You have to perform hive analysis on this given dataset.
+
+Download Dataset 1 - https://drive.google.com/file/d/1WrG-9qv6atP-W3P_-gYln1hHyFKRKMHP/view -- done
+
+Download Dataset 2 - https://drive.google.com/file/d/1-JIPCZ34dyN6k9CqJa-Y8yxIGq6vTVXU/view -- done
+
+Note: both files are csv files. 
+
+
+1. Create a schema based on the given dataset
+
+create external table AgentPerformance(
+	SLno int,
+	Date string,
+	AgentName string,
+	TotalChats int,
+	AvgResponseTime string,
+	AvgResolutionTime string,
+	AvgRating double,
+	totalfeedback int)
+	row format delimited
+	fileds terminated by ','
+	location '/project1/AgentPerformance/'
+	tblproperties ("skip.header.line.count" = "1")
+
+create external table AgentLogingReport(
+	SLno int,
+	AgentName string,
+	Date string,
+	LoginTime string,
+	LogoutTime string,
+	Duration string)
+	row format delimited
+	fileds terminated by ','
+	location '/project1/AgentLogingReport/'
+	tblproperties ("skip.header.line.count" = "1")
+
+2. Dump the data inside the hdfs in the given schema location.
+
+hadoop fs -copyFromLocal '/venkat/AgentLogingReport.csv /project1/AgentLogingReport/
+hadoop fs -copyFromLocal '/venkat/AgentPerformance.csv /project1/AgentPerformance/
+
+
+3. List of all agents' names.
+
+select distinct(agentname) as all_agents from agentlogingreport;
+
+#sample result
+all_agents
+Aditya Shinde
+Aditya_iot
+Amersh
+Ameya Jain
+Ankitjha
+Anurag Tiwari
+Aravind
+Ayushi Mishra
+Bharath
+Boktiar Ahmed Bappy
+Chaitra K Hiremath
+Deepranjan Gupta
+
+
+4. Find out agent average rating.
+
+> select agentname, (sum(avgrating)/count(1)) as avg_rating from agentperformance group by agentname;
+
+#sample result
+agentname       avg_rating
+Abhishek        0.0
+Aditya  0.0
+Aditya Shinde   1.8003333333333333
+Aditya_iot      2.3453333333333335
+Amersh  0.0
+Ameya Jain      2.219666666666667
+Anirudh         0.645
+Ankit Sharma    0.0
+Ankitjha        0.26666666666666666
+Anurag Tiwari   0.18333333333333332
+Aravind         2.1813333333333333
+Ashad Nasim     0.16666666666666666
+Ashish  0.0
+Ayushi Mishra   3.4819999999999998
+Bharath         2.983666666666667
+Boktiar Ahmed Bappy     3.5679999999999996
+Chaitra K Hiremath      0.8646666666666666
+Deepranjan Gupta        2.886666666666666
+Dibyanshu       0.0
+Harikrishnan Shaji      2.6396666666666673
+
+
+
+5. Total working days for each agents 
+
+select agentname, count(date) as total_working_days from agentlogingreport group by agentname;
+
+#sample result
+agentname       total_working_days
+Aditya Shinde   1
+Aditya_iot      9
+Amersh  4
+Ameya Jain      10
+Ankitjha        4
+Anurag Tiwari   37
+Aravind 10
+Ayushi Mishra   18
+Bharath 9
+Boktiar Ahmed Bappy     17
+Chaitra K Hiremath      13
+Deepranjan Gupta        58
+Dibyanshu       208
+Harikrishnan Shaji      23
+Hrisikesh Neogi 37
+Hyder Abbas     2
+
+
+6. Total query that each agent have taken
+ -- question is not clear
+ 
+ 
+7. Total Feedback that each agent have received 
+
+>select agentname, sum(totalfeedback) as total_feedback from agentperformance group by agentname;
+
+#sample result
+agentname	total_feedback
+Abhishek        0
+Aditya  0
+Aditya Shinde   153
+Aditya_iot      131
+Amersh  0
+Ameya Jain      228
+Anirudh         39
+Ankit Sharma    0
+Ankitjha        3
+Anurag Tiwari   3
+Aravind         233
+Ashad Nasim     9
+Ashish  0
+Ayushi Mishra   329
+Bharath         247
+Boktiar Ahmed Bappy     311
+Chaitra K Hiremath      37
+Deepranjan Gupta        312
+Zeeshan         335
+
+8. Agent name who have average rating between 3.5 to 4 
+
+>  select agentname, sum(avgrating)/count(*) as avg_rating from agentperformance group by agentname having sum(avgrating)/count(*) between 3.5 and 4;
+
+#result
+agentname       avg_rating
+Boktiar Ahmed Bappy     3.5679999999999996
+Ishawant Kumar  3.543333333333334
+Khushboo Priya  3.703666666666666
+Manjunatha A    3.5946666666666665
+
+
+9. Agent name who have rating less than 3.5
+
+> select agentname, sum(avgrating)/count(*) as avg_rating from agentperformance group by agentname having sum(avgrating)/count(*) < 3.5;
+ 
+#sample result
+agentname       avg_rating
+Abhishek        0.0
+Aditya  0.0
+Aditya Shinde   1.8003333333333333
+Aditya_iot      2.3453333333333335
+Amersh  0.0
+Ameya Jain      2.219666666666667
+Anirudh         0.645
+Ankit Sharma    0.0
+Ankitjha        0.26666666666666666
+Anurag Tiwari   0.18333333333333332
+Aravind         2.1813333333333333
+Ashad Nasim     0.16666666666666666
+Ashish  0.0
+Ayushi Mishra   3.4819999999999998
+Bharath         2.983666666666667
+Chaitra K Hiremath      0.8646666666666666
+Deepranjan Gupta        2.886666666666666
+Dibyanshu       0.0
+Harikrishnan Shaji      2.6396666666666673
+Hitesh Choudhary        0.0
+
+
+10. Agent name who have rating more than 4.5 
+
+> select agentname, sum(avgrating)/count(*) as avg_rating from agentperformance group by agentname having sum(avgrating)/count(*) > 4.5;
+
+11. How many feedback agents have received more than 4.5 average
+
+> select agentname, sum(totalfeedback) as total_feedback from agentperformance group by agentname having sum(avgrating)/count(*) > 4.5;
+
+
+12. average weekly response time for each agent
+
+    > with cte as (
+    > select agentname,
+		weekofyear(from_unixtime(unix_timestamp(date, 'MM/dd/yyyy'),'yyyy-MM-dd')) as week_no, 
+		cast(from_unixtime(unix_timestamp(avgresponsetime,'HH:mm:ss'),'HH')as int) as hour,
+		cast(from_unixtime(unix_timestamp(avgresponsetime,'HH:mm:ss'),'mm')as int) as minute,
+		cast(from_unixtime(unix_timestamp(avgresponsetime,'HH:mm:ss'),'ss')as int) as second from agentperformance)
+    > select agentname, week_no, (sum(hour)*60*60+sum(minute)*60+sum(second))/7 as avg_response_in_seconds from cte group by agentname, week_no;
+
+ #sample result
+agentname       week_no avg_response_in_seconds
+Abhishek        26      0.0
+Abhishek        27      0.0
+Abhishek        28      0.0
+Abhishek        29      0.0
+Abhishek        30      0.0
+Aditya  26      0.0
+Aditya  27      0.0
+Aditya  28      0.0
+Aditya  29      0.0
+Aditya  30      0.0
+Aditya Shinde   26      23.714285714285715
+Aditya Shinde   27      47.285714285714285
+Aditya Shinde   28      56.42857142857143
+Aditya Shinde   29      0.0
+Aditya Shinde   30      0.0
+Aditya_iot      26      0.0
+Aditya_iot      27      20.142857142857142
+Aditya_iot      28      52.0
+Aditya_iot      29      30.142857142857142
+Aditya_iot      30      43.285714285714285
+Amersh  26      0.0
+Amersh  27      0.0
+Amersh  28      0.0
+Amersh  29      0.0
+Amersh  30      0.0
+
+
+13. average weekly resolution time for each agents
+
+    > with cte as (
+    > select agentname,
+		weekofyear(from_unixtime(unix_timestamp(date, 'MM/dd/yyyy'),'yyyy-MM-dd')) as week_no,
+		cast(from_unixtime(unix_timestamp(avgresolutiontime,'HH:mm:ss'),'HH')as int) as hour,
+		cast(from_unixtime(unix_timestamp(avgresolutiontime,'HH:mm:ss'),'mm')as int) as minute,
+		cast(from_unixtime(unix_timestamp(avgresolutiontime,'HH:mm:ss'),'ss')as int) as second from agentperformance)
+    > select agentname, week_no, (sum(hour)*60*60+sum(minute)*60+sum(second))/7 as avg_resolution_in_seconds from cte group by agentname, week_no;
+
+#sample result
+agentname       week_no avg_resolution_in_seconds
+Abhishek        26      0.0
+Abhishek        27      0.0
+Abhishek        28      0.0
+Abhishek        29      0.0
+Abhishek        30      0.0
+Aditya  26      0.0
+Aditya  27      0.0
+Aditya  28      0.0
+Aditya  29      0.0
+Aditya  30      0.0
+Aditya Shinde   26      397.2857142857143
+Aditya Shinde   27      903.8571428571429
+Aditya Shinde   28      1358.7142857142858
+Aditya Shinde   29      0.0
+Aditya Shinde   30      0.0
+Aditya_iot      26      0.0
+Aditya_iot      27      309.85714285714283
+Aditya_iot      28      911.0
+Aditya_iot      29      672.1428571428571
+Aditya_iot      30      632.5714285714286
+
+
+14. Find the number of chat on which they have received a feedback
+
+> select agentname, sum(totalchats) as total_chats from agentperformance where totalfeedback > 0 group by agentname;
+
+#sample result
+agentname       total_chats
+Aditya Shinde   277
+Aditya_iot      231
+Ameya Jain      322
+Anirudh         80
+Ankitjha        4
+Anurag Tiwari   4
+Aravind         366
+Ashad Nasim     18
+Ayushi Mishra   514
+Bharath         369
+Boktiar Ahmed Bappy     450
+Chaitra K Hiremath      64
+Deepranjan Gupta        492
+Harikrishnan Shaji      381
+
+15. Total contribution hour for each and every agents weekly basis
+ 
+    > with cte as (
+    > select agentname,
+		weekofyear(from_unixtime(unix_timestamp(date,'dd-MMM-yy' ),'yyyy-MM-dd')) as week_no,
+		cast(from_unixtime(unix_timestamp(duration,'HH:mm:ss'),'HH') as int) as hour,
+		cast(from_unixtime(unix_timestamp(duration,'HH:mm:ss'),'mm') as int) as minute,
+		cast(from_unixtime(unix_timestamp(duration,'HH:mm:ss'),'ss') as int) as second from agentlogingreport)
+    > select agentname, week_no, sum(hour)+(sum(minute))/60+(sum(second))/(60*60) as total_hours from cte group by agentname, week_no;
+
+#sample result
+ Aditya Shinde   30      0.03611111111111111
+Aditya_iot      29      6.095277777777778
+Aditya_iot      30      9.635833333333334
+Amersh  30      3.0638888888888887
+Ameya Jain      29      24.083055555555553
+Ameya Jain      30      17.9925
+Ankitjha        30      2.2669444444444444
+Anurag Tiwari   29      0.2644444444444444
+Anurag Tiwari   30      2.5144444444444445
+Aravind 29      24.235555555555557
+Aravind 30      0.06361111111111112
+Ayushi Mishra   29      17.790277777777778
+Ayushi Mishra   30      20.331388888888892
+Bharath 29      24.070833333333333
+Bharath 30      24.00583333333333
+
+16. Perform inner join, left join and right join based on the agent column and after joining the table export that data into your local system.
+
+> insert overwrite local directory '/home/cloudera/venkat/innerjoin/' row format delimited fields terminated by ',' select * from agentperformance ap inner join agentlogingreport al on ap.agentname = al.agentname;
+
+> insert overwrite local directory '/home/cloudera/venkat/leftjoin/' row format delimited fields terminated by ',' select * from agentperformance ap left join agentlogingreport al on ap.agentname = al.agentname;
+
+> insert overwrite local directory '/home/cloudera/venkat/rightjoin/' row format delimited fields terminated by ',' select * from agentperformance ap right join agentlogingreport al on ap.agentname = al.agentname;
+
+17. Perform partitioning on top of the agent column and then on top of that perform bucketing for each partitioning.
+
+> set hive.exec.dynamic.partition.mode = nontrue;
+> set hive.enforce.bucketing = true;
+> create table agentperformance_part_buck (
+    > slno int,
+    > date string,
+    > totalchats int,
+    > avgresponsetime string,
+    > avgresolutiontime string,
+    > avgrating double,
+    > totalfeedback int)
+    > partitioned by (agentname string)
+    > clustered by (slno) into 3 buckets
+    > row format delimited
+    > fields terminated by ',';
